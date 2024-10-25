@@ -37,8 +37,11 @@ namespace bmp {
     }
     PACKED_STRUCT_END
     // функция вычисления отступа по ширине
-    static int GetBMPStride(int w) {
-        return 4 * ((w * 3 + 3) / 4);
+    static int GetBMPStride(int width) {
+        const int factor_four = 4;
+        const int factor_width = 3;
+        const int round_digit = 3;
+        return factor_four * ((width * factor_width + round_digit) / factor_four);
     }
 
     
@@ -50,7 +53,7 @@ namespace bmp {
         BitmapFileHeader bfh;
         BitmapInfoHeader bih;
         size_t height = image.GetHeight();
-        size_t weight = image.GetWidth();
+        size_t wight = image.GetWidth();
         size_t pedding = GetBMPStride(image.GetStep());
         //----------------
         bfh.name[0] = 'B';
@@ -60,7 +63,7 @@ namespace bmp {
         bfh.space_start = sizeof(BitmapFileHeader) + sizeof(BitmapInfoHeader);
         //----------------
         bih.size_head = sizeof(BitmapInfoHeader);
-        bih.width_pixels = weight;
+        bih.width_pixels = wight;
         bih.height_pixels = height;
         bih.count_byte_data = height * pedding;
         //--------------
@@ -69,7 +72,7 @@ namespace bmp {
         std::vector<char> buff(pedding);
         for(int h = height - 1; h >= 0; --h){
             const Color* line = image.GetLine(h);
-            for (int x = 0; x < weight; ++x) {
+            for (int x = 0; x < wight; ++x) {
                 buff[x * 3  + 0] = static_cast<char>(line[x].b);
                 buff[x * 3  + 1] = static_cast<char>(line[x].g);
                 buff[x * 3  + 2] = static_cast<char>(line[x].r);
@@ -81,12 +84,19 @@ namespace bmp {
     }
 
     Image LoadBMP(const Path& file){
+        std::ifstream ifs(file, ios::binary);
+        if (!ifs.good()){
+            ifs.close();
+            return {};
+        }
         BitmapFileHeader bfh;
         BitmapInfoHeader bih;
-
-        std::ifstream ifs(file, ios::binary);
         ifs.read((char*)&bfh, sizeof(bfh));
         ifs.read((char*)&bih, sizeof(bih));
+        if (!ifs.good()){
+            ifs.close();
+            return {};
+        }
 
         int pedding = GetBMPStride(bih.width_pixels);
         int height = bih.height_pixels;
@@ -96,6 +106,10 @@ namespace bmp {
         for(int h = height - 1; h >= 0; --h){  
             Color* line = result.GetLine(h);
             ifs.read(buff.data(), pedding);
+            if (!ifs.good()){
+            ifs.close();
+            return {};
+        }
             for (int x = 0; x <  bih.width_pixels; ++x) {
                 line[x].b = static_cast<byte>(buff[x * 3 + 0]);
                 line[x].g = static_cast<byte>(buff[x * 3 + 1]);
