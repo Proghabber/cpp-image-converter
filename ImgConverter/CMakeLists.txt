@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory(../ImgLib ImgLibBuildDir)
 
+
 if (CMAKE_SYSTEM_NAME MATCHES "^MINGW")
     set(SYSTEM_LIBS -lstdc++)
 else()

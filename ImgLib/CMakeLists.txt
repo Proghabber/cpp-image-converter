@@ -4,12 +4,7 @@ project(ImgLib CXX)
 set(CMAKE_CXX_STANDARD 17)
 
 # добавляем новую переменную - путь к LibJPEG
-set(LIBJPEG_DIR CACHE STRING "LibJPEG static library directory")
-if(NOT LIBJPEG_DIR)
-    message(FATAL_ERROR "Please, specify LibJPEG directory via -DLIBJPEG_DIR=<dir>")
-endif()
-message(STATUS "LibJPEG dir is ${LIBJPEG_DIR}, change via -DLIBJPEG_DIR=<dir>")
-
+set(LIBJPEG_DIR  ../libjpeg)
 set(IMGLIB_MAIN_FILES img_lib.h img_lib.cpp)
 
 # к файлам форматов добавим JPEG
